@@ -19,12 +19,9 @@ RUN yum --setopt=tsflags=nodocs -y install wget nfs-utils attr iputils iproute c
 
 RUN wget http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm; rpm -ivh epel-release-latest-7.noarch.rpm; rm epel-release-latest-7.noarch.rpm;
 
-RUN yum --setopt=tsflags=nodocs -y install openssh-server openssh-clients ntp rsync tar cronie sudo xfsprogs glusterfs glusterfs-server glusterfs-geo-replication;yum clean all;
+RUN yum --setopt=tsflags=nodocs -y install openssh-clients ntp rsync tar cronie sudo xfsprogs glusterfs glusterfs-server glusterfs-geo-replication;yum clean all;
 
 RUN sed -i '/Defaults    requiretty/c\#Defaults    requiretty' /etc/sudoers
-
-# Changing the port of sshd to avoid conflicting with host sshd
-RUN sed -i '/Port 22/c\Port 2222' /etc/ssh/sshd_config
 
 # Backing up gluster config as it overlaps when bind mounting.
 RUN mkdir -p /etc/glusterfs_bkp /var/lib/glusterd_bkp /var/log/glusterfs_bkp;\
@@ -40,7 +37,6 @@ RUN chmod 644 /etc/systemd/system/gluster-setup.service
 ADD gluster-setup.sh /usr/sbin/gluster-setup.sh
 RUN chmod 500 /usr/sbin/gluster-setup.sh
 
-RUN echo 'root:password' | chpasswd
 VOLUME [ “/sys/fs/cgroup” ]
 
 RUN systemctl disable nfs-server.service
